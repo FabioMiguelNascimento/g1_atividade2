@@ -3,18 +3,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { useAuth } from '@/hooks/useAuth';
+import { formatDate } from '@/lib/formatters';
+import ProductList from './ProductList';
 
 export default function Dashboard() {
-  const { user, logout } = useAuthContext();
-  const router = useRouter();
-
-  const handleLogout = () => {
-    logout();
-    toast.success('Logout realizado com sucesso!');
-    router.push('/login');
-  };
+  const { user } = useAuthContext();
+  const { logout } = useAuth();
 
   if (!user) {
     return (
@@ -29,7 +24,7 @@ export default function Dashboard() {
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <Button onClick={handleLogout} variant="outline">
+          <Button onClick={logout} variant="outline">
             Sair
           </Button>
         </div>
@@ -47,7 +42,7 @@ export default function Dashboard() {
                 <p><strong>Nome:</strong> {user.name}</p>
                 <p><strong>Email:</strong> {user.email}</p>
                 <p><strong>Role:</strong> {user.role}</p>
-                <p><strong>Membro desde:</strong> {new Date(user.createdAt).toLocaleDateString('pt-BR')}</p>
+                <p><strong>Membro desde:</strong> {formatDate(user.createdAt)}</p>
               </div>
             </CardContent>
           </Card>
@@ -89,6 +84,10 @@ export default function Dashboard() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        <div className="mt-8">
+          <ProductList />
         </div>
       </div>
     </div>

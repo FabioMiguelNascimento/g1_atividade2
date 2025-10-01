@@ -4,13 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useAuthContext } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import * as z from 'zod';
 
 const registerSchema = z.object({
@@ -22,9 +19,7 @@ const registerSchema = z.object({
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterForm() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { register } = useAuthContext();
-  const router = useRouter();
+  const { register, isLoading } = useAuth();
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -36,18 +31,7 @@ export default function RegisterForm() {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    try {
-      setIsLoading(true);
-      await register(data);
-      toast.success('Conta criada com sucesso! Você foi automaticamente logado.');
-      router.push('/');
-    } catch (error: any) {
-      console.error('Erro no registro:', error);
-      const errorMessage = error.response?.data?.message || 'Erro ao criar conta. Tente novamente.';
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
+    await register(data);
   };
 
   return (
