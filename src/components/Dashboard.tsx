@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useAuth } from '@/hooks/useAuth';
+import { usePermissions } from '@/hooks/usePermissions';
 import { formatDate } from '@/lib/formatters';
 import ProductList from './ProductList';
 
 export default function Dashboard() {
   const { user } = useAuthContext();
   const { logout } = useAuth();
+  const { isAdmin, canCreateProduct, canAccessAdmin } = usePermissions();
 
   if (!user) {
     return (
@@ -41,7 +43,7 @@ export default function Dashboard() {
               <div className="space-y-2">
                 <p><strong>Nome:</strong> {user.name}</p>
                 <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>Role:</strong> {user.role}</p>
+                <p><strong>Tipo:</strong> {isAdmin ? 'Administrador' : 'Usuário'}</p>
                 <p><strong>Membro desde:</strong> {formatDate(user.createdAt)}</p>
               </div>
             </CardContent>
@@ -56,12 +58,18 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                <Button className="w-full" variant="outline">
-                  Gerenciar Produtos
-                </Button>
-                <Button className="w-full" variant="outline">
-                  Ver Relatórios
-                </Button>
+                {canCreateProduct && (
+                  <Button className="w-full" variant="outline">
+                    Novo Produto
+                  </Button>
+                )}
+                
+                {canAccessAdmin && (
+                  <Button className="w-full" variant="outline">
+                    Relatórios
+                  </Button>
+                )}
+                
                 <Button className="w-full" variant="outline">
                   Configurações
                 </Button>

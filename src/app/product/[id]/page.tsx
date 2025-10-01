@@ -3,17 +3,21 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { useProduct } from '@/hooks/useProducts';
+import { usePermissions } from '@/hooks/usePermissions';
+import { useProduct, useProductActions } from '@/hooks/useProducts';
 import { formatDateTime, formatPrice } from '@/lib/formatters';
 import { ArrowLeft } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuthContext();
+  const { canEditProduct, canDeleteProduct } = usePermissions();
+  const { deleteProduct, isLoading: isDeletingAction } = useProductActions();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const productId = Array.isArray(params.id) ? params.id[0] : params.id;
   const { product, isLoading, error } = useProduct(Number(productId));
@@ -36,6 +40,27 @@ export default function ProductDetailPage() {
 
   const handleGoBack = () => {
     router.push('/');
+  };
+
+  const handleEdit = () => {
+    toast.info('Funcionalidade de edição em desenvolvimento');
+  };
+
+const handleDelete = async () => {
+    if (!product || !confirm(`Tem certeza que deseja deletar o produto "${product.name}"?`)) {
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      await deleteProduct(product.id);
+      toast.success('Produto deletado com sucesso!');
+      router.push('/');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Erro ao deletar produto');
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   if (authLoading || isLoading) {
@@ -125,17 +150,38 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div className="flex gap-4 pt-6 border-t">
-              <Button className="flex-1">
-                Editar Produto
-              </Button>
-              <Button variant="outline" className="flex-1">
-                Duplicar
-              </Button>
-              <Button variant="destructive" className="flex-1">
-                Excluir
-              </Button>
-            </div>
+            {(canEditProduct || canDeleteProduct) && (
+              <div className="flex gap-4 pt-6 border-t">
+                {canEditProduct && (
+                  <>
+                    <Button 
+                      className="flex-1"
+                      onClick={handleEdit}
+                    >
+                      Editar Produto
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="flex-1"
+                      onClick={() => toast.info('Funcionalidade de duplicar em desenvolvimento')}
+                    >
+                      Duplicar
+                    </Button>
+                  </>
+                )}
+                
+                {canDeleteProduct && (
+                  <Button 
+                    variant="destructive" 
+                    className="flex-1"
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? 'Excluindo...' : 'Excluir'}
+                  </Button>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

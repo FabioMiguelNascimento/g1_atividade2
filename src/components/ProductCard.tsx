@@ -2,15 +2,19 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { usePermissions } from '@/hooks/usePermissions';
 import { formatDate, formatPrice } from '@/lib/formatters';
 import { Product } from '@/types/product';
 import Link from 'next/link';
 
 interface ProductCardProps {
   product: Product;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
+  const { canEditProduct, canDeleteProduct } = usePermissions();
   return (
     <Card className="hover:shadow-lg transition-shadow">
       <CardHeader>
@@ -44,9 +48,26 @@ export default function ProductCard({ product }: ProductCardProps) {
               Ver Detalhes
             </Button>
           </Link>
-          <Button variant="outline" size="sm">
-            Editar
-          </Button>
+          
+          {canEditProduct && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onEdit}
+            >
+              Editar
+            </Button>
+          )}
+          
+          {canDeleteProduct && (
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={onDelete}
+            >
+              Deletar
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>
