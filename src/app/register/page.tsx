@@ -1,17 +1,17 @@
 'use client';
 
-import Dashboard from '@/components/Dashboard';
+import RegisterForm from '@/components/RegisterForm';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export default function Home() {
+export default function RegisterPage() {
   const { isAuthenticated, isLoading } = useAuthContext();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+    if (isAuthenticated && !isLoading) {
+      router.push('/');
     }
   }, [isAuthenticated, isLoading, router]);
 
@@ -23,15 +23,9 @@ export default function Home() {
     );
   }
 
-  if (!isAuthenticated) {
+  if (isAuthenticated) {
     return null;
   }
 
-  return <Dashboard />;
-
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <p>Carregando...</p>
-    </div>
-  );
+  return <RegisterForm />;
 }
