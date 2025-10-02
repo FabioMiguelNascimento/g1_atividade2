@@ -15,7 +15,6 @@ export default function Navbar() {
     <nav className="border-b bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          {/* Logo e navegação principal */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
               <Package className="h-8 w-8 text-blue-600" />
@@ -24,7 +23,6 @@ export default function Navbar() {
               </span>
             </Link>
             
-            {/* Links de navegação (apenas quando logado) */}
             {isAuthenticated && (
               <div className="hidden md:flex items-center ml-10 space-x-8">
                 <Link
@@ -47,11 +45,9 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Área direita da navbar */}
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                {/* Botão mobile para criar produto */}
                 {canCreateProduct && (
                   <Link href="/products/create" className="md:hidden">
                     <Button size="sm" variant="outline">
@@ -60,11 +56,9 @@ export default function Navbar() {
                   </Link>
                 )}
                 
-                {/* Dropdown do usuário */}
                 <UserDropdown />
               </>
             ) : (
-              /* Botões de login/registro quando não logado */
               <div className="flex items-center space-x-2">
                 <Link href="/login">
                   <Button variant="ghost">
