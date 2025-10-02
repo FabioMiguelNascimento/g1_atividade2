@@ -3,41 +3,17 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useProductActions, useProducts } from '@/hooks/useProducts';
-import { useState } from 'react';
+import { useProducts } from '@/hooks/useProducts';
 import { toast } from 'sonner';
 import ProductCard from './ProductCard';
 
 export default function ProductList() {
-  const { products, isLoading, error, refetch } = useProducts();
-  const { deleteProduct, isLoading: isDeleting } = useProductActions();
+  const { products, isLoading, error } = useProducts();
   const { canCreateProduct } = usePermissions();
-  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   if (error) {
     toast.error(error);
   }
-
-  const handleEdit = (productId: number) => {
-    toast.info(`Editar produto ${productId} - Em desenvolvimento`);
-  };
-
-  const handleDelete = async (productId: number) => {
-    if (!confirm('Tem certeza que deseja deletar este produto?')) {
-      return;
-    }
-
-    try {
-      setDeletingId(productId);
-      await deleteProduct(productId);
-      toast.success('Produto deletado com sucesso!');
-      refetch();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Erro ao deletar produto');
-    } finally {
-      setDeletingId(null);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -92,8 +68,6 @@ export default function ProductList() {
           <ProductCard 
             key={product.id} 
             product={product}
-            onEdit={() => handleEdit(product.id)}
-            onDelete={() => handleDelete(product.id)}
           />
         ))}
       </div>

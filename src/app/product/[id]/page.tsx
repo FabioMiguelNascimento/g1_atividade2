@@ -1,5 +1,6 @@
 'use client';
 
+import DeleteProductDialog from '@/components/admin/DeleteProductDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -16,7 +17,8 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuthContext();
   const { canEditProduct, canDeleteProduct } = usePermissions();
-  const { deleteProduct, isLoading: isDeletingAction } = useProductActions();
+  const { deleteProduct } = useProductActions();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const productId = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -46,11 +48,9 @@ export default function ProductDetailPage() {
     toast.info('Funcionalidade de edição em desenvolvimento');
   };
 
-const handleDelete = async () => {
-    if (!product || !confirm(`Tem certeza que deseja deletar o produto "${product.name}"?`)) {
-      return;
-    }
-
+  const handleDeleteConfirm = async () => {
+    if (!product) return;
+    
     try {
       setIsDeleting(true);
       await deleteProduct(product.id);
@@ -153,31 +153,21 @@ const handleDelete = async () => {
             {(canEditProduct || canDeleteProduct) && (
               <div className="flex gap-4 pt-6 border-t">
                 {canEditProduct && (
-                  <>
-                    <Button 
-                      className="flex-1"
-                      onClick={handleEdit}
-                    >
-                      Editar Produto
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="flex-1"
-                      onClick={() => toast.info('Funcionalidade de duplicar em desenvolvimento')}
-                    >
-                      Duplicar
-                    </Button>
-                  </>
+                  <Button 
+                    className="flex-1"
+                    onClick={handleEdit}
+                  >
+                    Editar Produto
+                  </Button>
                 )}
                 
                 {canDeleteProduct && (
                   <Button 
                     variant="destructive" 
                     className="flex-1"
-                    onClick={handleDelete}
-                    disabled={isDeleting}
+                    onClick={() => setShowDeleteDialog(true)}
                   >
-                    {isDeleting ? 'Excluindo...' : 'Excluir'}
+                    Excluir
                   </Button>
                 )}
               </div>
@@ -185,6 +175,16 @@ const handleDelete = async () => {
           </CardContent>
         </Card>
       </div>
+      
+      {product && (
+        <DeleteProductDialog
+          product={product}
+          open={showDeleteDialog}
+          onOpenChange={setShowDeleteDialog}
+          onConfirm={handleDeleteConfirm}
+          isLoading={isDeleting}
+        />
+      )}
     </div>
   );
 }

@@ -28,11 +28,22 @@ export function useProducts() {
     loadProducts();
   }, []);
 
+  const deleteProduct = async (id: number) => {
+    try {
+      await productService.deleteProduct(id);
+      await loadProducts();
+    } catch (err: any) {
+      console.error('Erro ao deletar produto:', err);
+      throw err;
+    }
+  };
+
   return {
     products,
     isLoading,
     error,
-    refetch: loadProducts
+    refetch: loadProducts,
+    deleteProduct
   };
 }
 

@@ -1,22 +1,25 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { usePermissions } from '@/hooks/usePermissions';
 import { formatDate, formatPrice } from '@/lib/formatters';
 import { Product } from '@/types/product';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface ProductCardProps {
   product: Product;
-  onEdit?: () => void;
-  onDelete?: () => void;
 }
 
-export default function ProductCard({ product, onEdit, onDelete }: ProductCardProps) {
-  const { canEditProduct, canDeleteProduct } = usePermissions();
+export default function ProductCard({ product }: ProductCardProps) {
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    router.push(`/product/${product.id}`);
+  };
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card 
+      className="hover:shadow-lg transition-shadow cursor-pointer hover:scale-[1.02] transition-transform" 
+      onClick={handleCardClick}
+    >
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
@@ -37,37 +40,13 @@ export default function ProductCard({ product, onEdit, onDelete }: ProductCardPr
           {product.description || 'Sem descrição disponível'}
         </p>
         
-        <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+        <div className="flex justify-between items-center text-sm text-gray-500">
           <span>ID: {product.id}</span>
           <span>Criado em: {formatDate(product.createdAt)}</span>
         </div>
         
-        <div className="flex gap-2">
-          <Link href={`/product/${product.id}`} className="flex-1">
-            <Button variant="default" className="w-full">
-              Ver Detalhes
-            </Button>
-          </Link>
-          
-          {canEditProduct && (
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={onEdit}
-            >
-              Editar
-            </Button>
-          )}
-          
-          {canDeleteProduct && (
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={onDelete}
-            >
-              Deletar
-            </Button>
-          )}
+        <div className="mt-4 text-sm text-blue-600 hover:text-blue-800 font-medium">
+          Clique para ver detalhes →
         </div>
       </CardContent>
     </Card>
