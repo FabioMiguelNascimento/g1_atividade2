@@ -18,7 +18,7 @@ class ProductService {
   }
 
   async updateProduct(id: number, productData: UpdateProductRequest): Promise<Product> {
-    const response = await api.put<ApiResponse<Product>>(`/products/${id}`, productData);
+    const response = await api.patch<ApiResponse<Product>>(`/products/${id}`, productData);
     return response.data.data;
   }
 

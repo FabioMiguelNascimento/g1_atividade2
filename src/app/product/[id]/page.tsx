@@ -1,12 +1,14 @@
 'use client';
 
 import DeleteProductDialog from '@/components/admin/DeleteProductDialog';
+import EditProductDialog from '@/components/EditProductDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useProduct, useProductActions } from '@/hooks/useProducts';
 import { formatDateTime, formatPrice } from '@/lib/formatters';
+import { EditProductFormData } from '@/schemas/product.schema';
 import { ArrowLeft } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -17,12 +19,14 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useAuthContext();
   const { canEditProduct, canDeleteProduct } = usePermissions();
-  const { deleteProduct } = useProductActions();
+  const { deleteProduct, updateProduct } = useProductActions();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const productId = Array.isArray(params.id) ? params.id[0] : params.id;
-  const { product, isLoading, error } = useProduct(Number(productId));
+  const { product, isLoading, error, refetch } = useProduct(Number(productId));
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -45,7 +49,24 @@ export default function ProductDetailPage() {
   };
 
   const handleEdit = () => {
-    toast.info('Funcionalidade de edição em desenvolvimento');
+    setShowEditDialog(true);
+  };
+
+  const handleSaveEdit = async (data: EditProductFormData) => {
+    if (!product) return;
+
+    try {
+      setIsUpdating(true);
+      await updateProduct(product.id, data);
+      toast.success('Produto atualizado com sucesso!');
+      setShowEditDialog(false);
+      refetch();
+    } catch (error: any) {
+      console.error('Erro ao atualizar produto:', error);
+      toast.error(error.response?.data?.message || 'Erro ao atualizar produto');
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   const handleDeleteConfirm = async () => {
@@ -177,13 +198,23 @@ export default function ProductDetailPage() {
       </div>
       
       {product && (
-        <DeleteProductDialog
-          product={product}
-          open={showDeleteDialog}
-          onOpenChange={setShowDeleteDialog}
-          onConfirm={handleDeleteConfirm}
-          isLoading={isDeleting}
-        />
+        <>
+          <DeleteProductDialog
+            product={product}
+            open={showDeleteDialog}
+            onOpenChange={setShowDeleteDialog}
+            onConfirm={handleDeleteConfirm}
+            isLoading={isDeleting}
+          />
+          
+          <EditProductDialog
+            product={product}
+            open={showEditDialog}
+            onOpenChange={setShowEditDialog}
+            onSave={handleSaveEdit}
+            isLoading={isUpdating}
+          />
+        </>
       )}
     </div>
   );

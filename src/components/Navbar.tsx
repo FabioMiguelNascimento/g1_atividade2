@@ -32,15 +32,6 @@ export default function Navbar() {
                   Produtos
                 </Link>
                 
-                {canCreateProduct && (
-                  <Link
-                    href="/products/create"
-                    className="flex items-center text-gray-900 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    Novo Produto
-                  </Link>
-                )}
               </div>
             )}
           </div>
@@ -48,14 +39,6 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                {canCreateProduct && (
-                  <Link href="/products/create" className="md:hidden">
-                    <Button size="sm" variant="outline">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </Link>
-                )}
-                
                 <UserDropdown />
               </>
             ) : (

@@ -1,15 +1,36 @@
 'use client';
 
+import CreateProductDialog from '@/components/CreateProductDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePermissions } from '@/hooks/usePermissions';
-import { useProducts } from '@/hooks/useProducts';
+import { useProductActions, useProducts } from '@/hooks/useProducts';
+import { CreateProductFormData } from '@/schemas/product.schema';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import ProductCard from './ProductCard';
 
 export default function ProductList() {
-  const { products, isLoading, error } = useProducts();
+  const { products, isLoading, error, refetch } = useProducts();
   const { canCreateProduct } = usePermissions();
+  const { createProduct } = useProductActions();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+
+  const handleCreateProduct = async (data: CreateProductFormData) => {
+    try {
+      setIsCreating(true);
+      await createProduct(data);
+      toast.success('Produto criado com sucesso!');
+      setShowCreateDialog(false);
+      refetch();
+    } catch (error: any) {
+      console.error('Erro ao criar produto:', error);
+      toast.error(error.response?.data?.message || 'Erro ao criar produto');
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   if (error) {
     toast.error(error);
@@ -34,7 +55,11 @@ export default function ProductList() {
         </CardHeader>
         <CardContent>
           {canCreateProduct ? (
-            <Button className="w-full">
+            <Button 
+              className="w-full" 
+              onClick={() => setShowCreateDialog(true)}
+              disabled={isCreating}
+            >
               Cadastrar Primeiro Produto
             </Button>
           ) : (
@@ -57,7 +82,10 @@ export default function ProductList() {
           </p>
         </div>
         {canCreateProduct && (
-          <Button>
+          <Button 
+            onClick={() => setShowCreateDialog(true)}
+            disabled={isCreating}
+          >
             Novo Produto
           </Button>
         )}
@@ -71,6 +99,13 @@ export default function ProductList() {
           />
         ))}
       </div>
+
+      <CreateProductDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSave={handleCreateProduct}
+        isLoading={isCreating}
+      />
     </div>
   );
 }
