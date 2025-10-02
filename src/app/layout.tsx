@@ -1,11 +1,12 @@
+import Navbar from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Fullstack App",
-  description: "Aplicação fullstack com Next.js e Node.js",
+  title: "ProductApp",
+  description: "Aplicação fullstack para gerenciamento de produtos",
 };
 
 export default function RootLayout({
@@ -17,7 +18,10 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body>
         <AuthProvider>
-          {children}
+          <Navbar />
+          <main className="min-h-screen bg-gray-50">
+            {children}
+          </main>
           <Toaster />
         </AuthProvider>
       </body>

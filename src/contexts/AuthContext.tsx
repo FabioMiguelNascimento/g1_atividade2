@@ -1,6 +1,7 @@
 'use client';
 
 import authService from '@/services/auth.service';
+import { UpdateProfileData, updateProfile as updateUserProfile } from '@/services/user.service';
 import { LoginRequest, RegisterRequest, User } from '@/types/auth';
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 
@@ -11,6 +12,7 @@ interface AuthContextType {
   login: (credentials: LoginRequest) => Promise<void>;
   register: (userData: RegisterRequest) => Promise<void>;
   logout: () => void;
+  updateProfile: (data: UpdateProfileData) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -89,13 +91,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(null);
   };
 
+  const updateProfile = async (data: UpdateProfileData) => {
+    if (!user) throw new Error('Usuário não autenticado');
+    
+    try {
+      setIsLoading(true);
+      const updatedUser = await updateUserProfile(user.id, data);
+      
+      setUser(updatedUser);
+      authService.saveAuthData(authService.getAuthData().token!, updatedUser);
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const contextValue: AuthContextType = {
     user,
     isLoading,
     isAuthenticated,
     login,
     register,
-    logout
+    logout,
+    updateProfile
   };
 
   return (
