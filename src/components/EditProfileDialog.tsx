@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { editProfileSchema, type EditProfileFormData } from '@/schemas/user.schema';
+import { editProfileWithPasswordSchema, type EditProfileWithPasswordFormData } from '@/schemas/user.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -32,11 +32,13 @@ interface EditProfileDialogProps {
 export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps) {
   const { user, updateProfile, isLoading } = useAuthContext();
 
-  const form = useForm<EditProfileFormData>({
-    resolver: zodResolver(editProfileSchema),
+  const form = useForm<EditProfileWithPasswordFormData>({
+    resolver: zodResolver(editProfileWithPasswordSchema),
     defaultValues: {
       name: '',
-      email: ''
+      email: '',
+      password: '',
+      confirmPassword: ''
     }
   });
 
@@ -44,26 +46,34 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
     if (user && open) {
       form.reset({
         name: user.name,
-        email: user.email
+        email: user.email,
+        password: '',
+        confirmPassword: ''
       });
     }
   }, [user, open, form]);
 
-  const onSubmit = async (data: EditProfileFormData) => {
+  const onSubmit = async (data: EditProfileWithPasswordFormData) => {
     if (!user) return;
 
     try {
-      if (data.name === user.name && data.email === user.email) {
+      const hasNameOrEmailChange = data.name !== user.name || data.email !== user.email;
+      const hasPasswordChange = data.password && data.password.length > 0;
+      
+      if (!hasNameOrEmailChange && !hasPasswordChange) {
         toast.info('Nenhuma alteração foi feita');
         onOpenChange(false);
         return;
       }
 
+      const updateData = {
+        name: data.name,
+        email: data.email,
+        ...(hasPasswordChange && { password: data.password })
+      };
+
       await toast.promise(
-        updateProfile({
-          name: data.name,
-          email: data.email
-        }),
+        updateProfile(updateData),
         {
           loading: 'Atualizando perfil...',
           success: 'Perfil atualizado com sucesso!',
@@ -91,7 +101,7 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
         <DialogHeader>
           <DialogTitle>Editar Perfil</DialogTitle>
           <DialogDescription>
-            Atualize suas informações pessoais aqui. Clique em salvar quando terminar.
+            Atualize suas informações pessoais aqui. A senha é opcional - deixe em branco para manter a atual.
           </DialogDescription>
         </DialogHeader>
 
@@ -126,6 +136,44 @@ export function EditProfileDialog({ open, onOpenChange }: EditProfileDialogProps
                       <Input
                         type="email"
                         placeholder="Digite seu email"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nova Senha (opcional)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Deixe em branco para manter a atual"
+                        {...field}
+                        disabled={isLoading}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Nova Senha</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirme a nova senha"
                         {...field}
                         disabled={isLoading}
                       />

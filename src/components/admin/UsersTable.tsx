@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { User, useUsers } from '@/hooks/useUsers';
 import { formatDate } from '@/lib/formatters';
-import { Edit, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import DeleteUserDialog from './DeleteUserDialog';
 
@@ -93,14 +93,11 @@ export default function UsersTable({ currentUserId }: UsersTableProps) {
             <TableCell>{formatDate(user.createdAt)}</TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end space-x-2">
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4" />
-                </Button>
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => handleDeleteClick(user)}
-                  disabled={user.id === currentUserId}
+                  disabled={user.id === currentUserId || isDeletingUser}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
