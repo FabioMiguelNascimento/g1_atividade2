@@ -1,10 +1,10 @@
 'use client';
 
+import EditProductDialog from '@/components/EditProductDialog';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import EditProductDialog from '@/components/EditProductDialog';
-import { useProducts, useProductActions } from '@/hooks/useProducts';
+import { useProductActions, useProducts } from '@/hooks/useProducts';
 import { formatDate, formatPrice } from '@/lib/formatters';
 import { EditProductFormData } from '@/schemas/product.schema';
 import { Product } from '@/types/product';
